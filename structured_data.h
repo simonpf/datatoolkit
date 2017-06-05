@@ -11,6 +11,17 @@
 
 #include "type_names.h"
 
+template<typename T>
+std::vector<size_t> sequence_vector(const std::vector<T>& v)
+{
+    std::vector<size_t> w(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        w[i] = i;
+    }
+    return w;
+}
+
 template <typename NumberType>
 class StructuredData {
 
@@ -30,6 +41,21 @@ public:
         dimensions[0] = length;
         order[0] = 0;
     };
+
+    StructuredData(std::vector<size_t> dimensions, std::vector<size_t> order)
+        : dimensions(dimensions), order(order)
+    {
+        raw_data = std::shared_ptr<NumberType>(new NumberType[nelements()],
+                                               [](NumberType* ptr){delete[] ptr;});
+    };
+
+    StructuredData(std::vector<size_t> dimensions)
+        : dimensions(dimensions), order(sequence_vector(dimensions))
+    {
+        raw_data = std::shared_ptr<NumberType>(new NumberType[nelements()],
+                                               [](NumberType* ptr){delete[] ptr;});
+    };
+        
 
     NumberType & get_element(size_t i)       {return raw_data.get()[i];};
     NumberType   get_element(size_t i) const {return raw_data.get()[i];};
@@ -52,6 +78,7 @@ private:
     std::shared_ptr<NumberType> raw_data;
 
 };
+
 
 template <typename NumberType>
 std::ostream& operator<< (
